@@ -57,8 +57,17 @@ class DB {
 	static protected $debug_sql_log;
 	static private $cid;
 	
-	static function init(string $map_path=__DIR__.'/maps'){
+	static function init(string $map_path=__DIR__.'/maps', array $options=[], int $debug_sql_log=0){
 		self::$map_path = $map_path;
+		
+		if($options){
+			self::$options += $options;
+		}
+		
+		if(self::$debug_sql_log = $debug_sql_log){
+			self::$cid = substr(md5(microtime(true)), 0, 6);
+			self::log_debug('INITIATED (debug level: '.self::$debug_sql_log.')');
+		}
 		
 		if(!self::$int_range){
 			self::$int_range = [
@@ -71,19 +80,9 @@ class DB {
 		}
 	}
 	
-	static public function set_options(array $options, int $debug_sql_log=0){
-		self::$options 			+= $options;
-		self::$debug_sql_log 	= $debug_sql_log;
-	}
-	
 	static public function connect(string $handle, string $db, string $user, string $pass, int $port=3306, string $host='localhost', string $driver='mysql'){
 		if(isset(self::$connections[$handle])){
 			throw new Error('DB connection handle already used');
-		}
-		
-		if(self::$debug_sql_log){
-			self::$cid = substr(md5(microtime(true)), 0, 6);
-			self::log_debug('CONNECTED (debug level: '.self::$debug_sql_log.')');
 		}
 		
 		try{
@@ -360,6 +359,10 @@ class DB {
 		}
 	}
 	
+	static protected function log_debug(string $message){
+		\Log\Log::log(self::$cid.' '.$message, 'debug_sql');
+	}
+	
 	static private function &get_dbh_all(): array{
 		if(empty(self::$connections[self::$connection])){
 			throw new Error('Invalid DB connection handle');
@@ -367,10 +370,6 @@ class DB {
 		else{
 			return self::$connections[self::$connection];
 		}
-	}
-	
-	static private function log_debug(string $message){
-		\Log\Log::log(self::$cid.' '.$message, 'debug_sql');
 	}
 }
 
