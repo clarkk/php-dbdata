@@ -4,21 +4,21 @@ namespace dbdata;
 
 require_once 'Map.php';
 require_once 'Data.php';
-require_once 'Data_pre.php';
-require_once 'Data_post.php';
-require_once 'Data_action.php';
+//require_once 'Data_pre.php';
+//require_once 'Data_post.php';
+//require_once 'Data_action.php';
 require_once 'Table.php';
-require_once 'Input.php';
-require_once 'Model.php';
-require_once 'Action.php';
+//require_once 'Input.php';
+//require_once 'Model.php';
+//require_once 'Action.php';
 
 require_once 'Get.php';
-require_once 'Put.php';
-require_once 'Delete.php';
-require_once 'Query.php';
+//require_once 'Put.php';
+//require_once 'Delete.php';
+//require_once 'Query.php';
 
-require_once \Ini::get('path/class').'/Error_input.php';
-require_once \Ini::get('path/class').'/Data.php';
+//require_once \Ini::get('path/class').'/Error_input.php';
+//require_once \Ini::get('path/class').'/Data.php';
 
 class DB {
 	static private $connection;
@@ -36,6 +36,12 @@ class DB {
 	private const DBH 			= 'dbh';
 	private const TRANSACTION 	= 'transaction';
 	
+	const OPT_ERR_MAXLENGTH = 'opt_err_maxlength';
+	
+	static protected $options = [
+		self::OPT_ERR_MAXLENGTH 	=> true
+	];
+	
 	const TYPE_INTEGER 	= 'int';
 	const TYPE_DECIMAL 	= 'decimal';
 	const TYPE_ENUM 	= 'enum';
@@ -45,7 +51,15 @@ class DB {
 	const TYPE_MAP 		= 'map';
 	const TYPE_DATE 	= 'date';
 	
-	static function init(){
+	static private $map_path;
+	
+	//	Debug SQL
+	static protected $debug_sql_log;
+	static private $cid;
+	
+	static function init(string $map_path=__DIR__.'/maps'){
+		self::$map_path = $map_path;
+		
 		if(!self::$int_range){
 			self::$int_range = [
 				'tinyint'	=> bcpow(2, 8),
@@ -57,9 +71,19 @@ class DB {
 		}
 	}
 	
+	static public function set_options(array $options, int $debug_sql_log=0){
+		self::$options 			+= $options;
+		self::$debug_sql_log 	= $debug_sql_log;
+	}
+	
 	static public function connect(string $handle, string $db, string $user, string $pass, int $port=3306, string $host='localhost', string $driver='mysql'){
 		if(isset(self::$connections[$handle])){
 			throw new Error('DB connection handle already used');
+		}
+		
+		if(self::$debug_sql_log){
+			self::$cid = substr(md5(microtime(true)), 0, 6);
+			self::log_debug('CONNECTED (debug level: '.self::$debug_sql_log.')');
 		}
 		
 		try{
@@ -75,8 +99,9 @@ class DB {
 				self::TRANSACTION	=> false
 			];
 			
+			//	Load map
 			$map_class = ucfirst($handle);
-			$file = 'map/'.$handle.'/'.$map_class.'.php';
+			$file = self::$map_path.'/'.$handle.'/'.$map_class.'.php';
 			if(!include_once $file){
 				throw new Error('File missing: '.$file);
 			}
@@ -87,13 +112,9 @@ class DB {
 			if(!self::$connection){
 				self::use_connection($handle);
 			}
-			
-			//	http://www.tocker.ca/2014/01/24/proposal-to-enable-sql-mode-only-full-group-by-by-default.html
-			//	https://dev.mysql.com/doc/refman/5.6/en/group-by-handling.html
-			//self::get_dbh()->prepare("SET SESSION sql_mode = CONCAT('ONLY_FULL_GROUP_BY,', (SELECT @@sql_mode))")->execute();
 		}
 		catch(\PDOException $e){
-			throw new \DB_error($e->getMessage());
+			throw new Error_db($e->getMessage(), $e->getCode());
 		}
 	}
 	
@@ -174,14 +195,14 @@ class DB {
 		
 		//	Trim strings if field maxlength is exceeded
 		if($is_db_text_field && mb_strlen($value) > $field_type['length']){
-			if(API){
-				$value = mb_substr($value, 0, $field_type['length']);
-			}
-			else{
+			if(self::$options[self::OPT_ERR_MAXLENGTH]){
 				throw new Error_input($field, 'DATA_FIELD_MAXLENGTH', [
 					'field'	=> $field_name,
 					'num'	=> $field_type['length']
 				]);
+			}
+			else{
+				$value = mb_substr($value, 0, $field_type['length']);
 			}
 		}
 		
@@ -191,8 +212,8 @@ class DB {
 	static public function begin(){
 		$dbh = &self::get_dbh_all();
 		if(!$dbh[self::TRANSACTION]){
-			if(DEBUG_SQL_LOG){
-				\Log::debug_sql(\Request::get().' BEGIN');
+			if(self::$debug_sql_log){
+				self::log_debug('BEGIN');
 			}
 			
 			$dbh[self::DBH]->beginTransaction();
@@ -203,8 +224,8 @@ class DB {
 	static public function commit(){
 		$dbh = &self::get_dbh_all();
 		if($dbh[self::TRANSACTION]){
-			if(DEBUG_SQL_LOG){
-				\Log::debug_sql(\Request::get().' COMMIT');
+			if(self::$debug_sql_log){
+				self::log_debug('COMMIT');
 			}
 			
 			$dbh[self::DBH]->commit();
@@ -215,8 +236,8 @@ class DB {
 	static public function rollback(){
 		$dbh = &self::get_dbh_all();
 		if($dbh[self::TRANSACTION]){
-			if(DEBUG_SQL_LOG){
-				\Log::debug_sql(\Request::get().' ROLLBACK');
+			if(self::$debug_sql_log){
+				self::log_debug('ROLLBACK');
 			}
 			
 			$dbh[self::DBH]->rollBack();
@@ -312,7 +333,7 @@ class DB {
 	
 	static public function get_class(string $type, string $name): string{
 		$name = ucfirst($name);
-		$file = 'map/'.self::$connection.'/'.$type.'/'.$name.'.php';
+		$file = self::$map_path.'/'.self::$connection.'/'.$type.'/'.$name.'.php';
 		
 		if(!include_once $file){
 			throw new Error('File missing: '.$file);
@@ -326,14 +347,14 @@ class DB {
 		
 		//	Return error if invalid fields are received
 		if($invalid_fields = array_diff_key($input, $require_fields)){
-			throw new \User_error('DATA_FIELDS_INVALID', [
+			throw new Error_input(null, 'DATA_FIELDS_INVALID', [
 				'fields' => implode(', ', array_keys($invalid_fields))
 			]);
 		}
 		
 		//	Return error if required fields are omitted
 		if($omit_fields = array_diff_key($require_fields, $input)){
-			throw new \User_error('DATA_FIELDS_REQUIRE', [
+			throw new Error_input(null, 'DATA_FIELDS_REQUIRE', [
 				'fields' => implode(', ', array_keys($omit_fields))
 			]);
 		}
@@ -347,15 +368,24 @@ class DB {
 			return self::$connections[self::$connection];
 		}
 	}
+	
+	static private function log_debug(string $message){
+		\Log\Log::log(self::$cid.' '.$message, 'debug_sql');
+	}
 }
 
+//	Fatal error
 class Error extends \Error {}
 
+//	Fatal DB error
+class Error_db extends \Error {}
+
+//	Error caused by user input
 class Error_input extends \Error {
 	private $field;
 	private $translate = [];
 	
-	public function __construct(string $field, string $message, Array $translate=[]){
+	public function __construct(?string $field, string $message, array $translate=[]){
 		parent::__construct($message);
 		$this->field 		= $field;
 		$this->translate 	= $translate;
