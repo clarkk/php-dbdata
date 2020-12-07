@@ -58,6 +58,13 @@ class DB {
 	static private $cid;
 	
 	static function init(string $map_path=__DIR__.'/maps', array $options=[], int $debug_sql_log=0){
+		/*	
+		*	Set debug SQL log level (debug_sql_log)
+		*	0: log no SQL queries
+		*	1: log write SQL queries
+		*	2: log read/write SQL queries
+		*/
+		
 		self::$map_path = $map_path;
 		
 		if($options){
