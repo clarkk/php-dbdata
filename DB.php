@@ -68,7 +68,7 @@ class DB {
 		self::$map_path = $map_path;
 		
 		if($options){
-			self::$options += $options;
+			self::$options = $options + self::$options;
 		}
 		
 		if(self::$debug_sql_log = $debug_sql_log){
