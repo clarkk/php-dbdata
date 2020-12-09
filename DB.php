@@ -13,8 +13,8 @@ require_once 'Table.php';
 //require_once 'Action.php';
 
 require_once 'Get.php';
-//require_once 'Put.php';
-//require_once 'Delete.php';
+require_once 'Put.php';
+require_once 'Delete.php';
 //require_once 'Query.php';
 
 //require_once \Ini::get('path/class').'/Error_input.php';
