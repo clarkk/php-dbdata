@@ -146,10 +146,16 @@ class DB {
 			self::$errors[self::$connection] = [];
 		}
 		
-		self::$errors[self::$connection][$field] = [
-			'message'	=> $message,
-			'translate'	=> $translate
-		];
+		throw new Error('TRANSLATE ERRORS IN DB');
+		/*if($translate){
+			$replace = [];
+			foreach($translate as $k => $v){
+				$replace['%'.$k.'%'] = $v;
+			}
+			$message = strtr($message, $replace);
+		}*/
+		
+		self::$errors[self::$connection][$field] = $message;
 	}
 	
 	static public function check_errors(): bool{
