@@ -2,22 +2,6 @@
 
 namespace dbdata;
 
-require_once 'Map.php';
-require_once 'Data.php';
-//require_once 'Data_pre.php';
-//require_once 'Data_post.php';
-//require_once 'Data_action.php';
-require_once 'Table.php';
-//require_once 'Input.php';
-//require_once 'Model.php';
-//require_once 'Action.php';
-
-require_once 'Get.php';
-require_once 'Put.php';
-require_once 'Delete.php';
-//require_once 'Query.php';
-require_once 'Lang.php';
-
 class DB {
 	static private $connection;
 	static private $connections 	= [];
