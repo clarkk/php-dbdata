@@ -55,7 +55,7 @@ abstract class Table {
 			
 			//	Override environment determined variables
 			foreach($override as $key => $value){
-				$return[$key] = \Env::get($value);
+				$return[$key] = DB::get_env($value);
 			}
 			
 			//	Override table constants

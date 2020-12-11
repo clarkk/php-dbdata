@@ -16,9 +16,7 @@ require_once 'Get.php';
 require_once 'Put.php';
 require_once 'Delete.php';
 //require_once 'Query.php';
-
-//require_once \Ini::get('path/class').'/Error_input.php';
-//require_once \Ini::get('path/class').'/Data.php';
+require_once 'Lang.php';
 
 class DB {
 	static private $connection;
@@ -50,6 +48,8 @@ class DB {
 	const TYPE_LIST 	= 'list';
 	const TYPE_MAP 		= 'map';
 	const TYPE_DATE 	= 'date';
+	
+	static private $env = [];
 	
 	static private $map_path;
 	
@@ -85,6 +85,18 @@ class DB {
 				'bigint'	=> bcpow(2, 64)
 			];
 		}
+	}
+	
+	static public function set_env(string $key, string $value){
+		self::$env[$key] = $value;
+	}
+	
+	static public function get_env(string $key): string{
+		if(!isset(self::$env[$key])){
+			throw new Error("Env invalid key: $key");
+		}
+		
+		return self::$env[$key];
 	}
 	
 	static public function connect(string $handle, string $db, string $user, string $pass, int $port=3306, string $host='localhost', string $driver='mysql'){
