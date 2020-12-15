@@ -272,9 +272,7 @@ class Put extends Data {
 				}
 				
 				if(!$this->where){
-					return [
-						'id' => (int)$return_id
-					];
+					return (int)$return_id;
 				}
 			}
 		}
