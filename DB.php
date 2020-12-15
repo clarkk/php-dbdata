@@ -18,7 +18,7 @@ class DB {
 	private const DBH 			= 'dbh';
 	private const TRANSACTION 	= 'transaction';
 	
-	const OPT_ERR_MAXLENGTH = 'opt_err_maxlength';
+	const OPT_ERR_MAXLENGTH 	= 'opt_err_maxlength';
 	
 	static protected $options = [
 		self::OPT_ERR_MAXLENGTH 	=> true

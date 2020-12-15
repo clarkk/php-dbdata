@@ -18,6 +18,7 @@ class Lang {
 	const LANG_EN = 'en';
 	
 	static private $lang;
+	static private $locale;
 	
 	static public function init(string $lang){
 		self::$lang = strtolower($lang);
@@ -27,8 +28,37 @@ class Lang {
 		setLocale(LC_CTYPE, $locale);
 		setLocale(LC_MONETARY, $locale);
 		$localeconv = localeconv();
-		//self::set('locale/decimal_point', $localeconv['mon_decimal_point']);
-		//self::set('locale/thousands_sep', $localeconv['mon_thousands_sep']);
+		
+		self::$locale = [
+			'decimal_point'	=> $localeconv['mon_decimal_point'],
+			'thousands_sep'	=> $localeconv['mon_thousands_sep']
+		];
+	}
+	
+	static public function num(float $num, int $dec=0, string $thousand_sep='', string $decimal_sep=''): string{
+		return number_format($num, $dec, $decimal_sep ?: self::$locale['decimal_point'], $thousand_sep ?: self::$locale['thousands_sep']);
+	}
+	
+	static public function num_datasize(int $int): string{
+		if(!$int){
+			return '0';
+		}
+		
+		$arr = [
+			'Bytes'	=> 1,
+			'Kb'	=> 1024,
+			'Mb'	=> 1024 * 1024
+		];
+		
+		$arr = array_reverse($arr);
+		foreach($arr as $key => $value){
+			$scale = $int / $value;
+			if($scale >= 1){
+				return self::num($scale, is_int($scale) ? 0 : 2).' '.$key;
+			}
+		}
+		
+		return '0';
 	}
 	
 	static public function get(string $string, array $trans=[], string $lang=''){
