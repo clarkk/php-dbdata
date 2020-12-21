@@ -169,6 +169,19 @@ class DB {
 		return preg_replace('/[^[:print:]'.($allow_newlines ? '\n' : '').']/u', '', mb_convert_encoding($value, 'UTF-8'));
 	}
 	
+	static public function trim_value($value, string $table, string $field){
+		$field_type = self::get_column_type($table, $field);
+		
+		switch($field_type['type']){
+			case 'char':
+				return $value ? mb_substr($value, 0, $field_type['length']) : '';
+			
+			case self::TYPE_INTEGER:
+			case self::TYPE_DECIMAL:
+				return ($value < $field_type['range']['from'] || $value > $field_type['range']['to']) ? 0 : $value;
+		}
+	}
+	
 	static public function value(string $value, string $field='', string $table='', string $field_name='', bool $trim_whitespaces=true, bool $allow_newlines=false): string{
 		if($table){
 			$field_type 		= self::get_column_type($table, $field);
