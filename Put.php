@@ -69,7 +69,7 @@ class Put extends Data {
 				elseif($this->external){
 					throw new Error('Multiple put not allowed in external requests');
 				}
-				elseif(!is_array_sequential($this->input)){
+				elseif(!$this->is_array_sequential($this->input)){
 					throw new Error('Multiple put input not sequential');
 				}
 				elseif(!$this->validate_multiple_input()){
@@ -418,5 +418,9 @@ class Put extends Data {
 		}
 		
 		return true;
+	}
+	
+	private function is_array_sequential(array $arr): bool{
+		return array_keys($arr) === range(0, count($arr) - 1) ? true : false;
 	}
 }
