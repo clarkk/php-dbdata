@@ -21,7 +21,7 @@ class DB {
 	const OPT_ERR_MAXLENGTH 	= 'opt_err_maxlength';
 	
 	static protected $options = [
-		self::OPT_ERR_MAXLENGTH 	=> true
+		self::OPT_ERR_MAXLENGTH => true
 	];
 	
 	const TYPE_INTEGER 	= 'int';
