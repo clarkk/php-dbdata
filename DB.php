@@ -271,7 +271,9 @@ class DB {
 	}
 	
 	static public function get_column_type(string $table, string $field=''): Array{
-		$apc_key = 'DB_COLUMN_'.self::$connection.'_'.$table;
+		$apc_key 		= 'DB_COLUMN_'.self::$connection.'_'.$table;
+		$cache_timeout 	= 600;
+		
 		if(!$db_column = apcu_fetch($apc_key)){
 			$db_column = [];
 			
@@ -341,7 +343,7 @@ class DB {
 				$db_column[$row['Field']]['extra'] = $row['Extra'];
 			}
 			
-			apcu_store($apc_key, $db_column, 60*10);
+			apcu_store($apc_key, $db_column, $cache_timeout);
 		}
 		
 		if($field){
