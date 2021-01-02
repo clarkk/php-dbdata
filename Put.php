@@ -277,7 +277,7 @@ class Put extends Data {
 			}
 		}
 		catch(\PDOException $e){
-			throw new Error_db($e->getMessage().'; SQL: '.$this->get_sql_string(true), isset($dbh) ? $dbh->errorInfo()[1] : 0);
+			throw new Error_db($e->getMessage().'; SQL: '.$this->get_sql_string(true), isset($dbh) ? (int)$dbh->errorInfo()[1] : 0);
 		}
 	}
 	
