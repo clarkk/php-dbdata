@@ -4,21 +4,21 @@ namespace dbdata;
 
 class DB {
 	static private $connection;
-	static private $connections 	= [];
-	static private $maps 			= [];
+	static private $connections 		= [];
+	static private $maps 				= [];
 	
-	static private $errors 			= [];
+	static private $errors 				= [];
 	
-	static private $int_range 		= [];
+	static private $int_range 			= [];
 	
 	static public $num_get_queries 		= 0;
 	static public $num_put_queries 		= 0;
 	static public $num_delete_queries 	= 0;
 	
-	private const DBH 			= 'dbh';
-	private const TRANSACTION 	= 'transaction';
+	private const DBH 					= 'dbh';
+	private const TRANSACTION 			= 'transaction';
 	
-	const OPT_ERR_MAXLENGTH 	= 'opt_err_maxlength';
+	const OPT_ERR_MAXLENGTH 			= 'opt_err_maxlength';
 	
 	static protected $options = [
 		self::OPT_ERR_MAXLENGTH => true
@@ -114,6 +114,10 @@ class DB {
 			if(!self::$connection){
 				self::use_connection($handle);
 			}
+			
+			//	http://www.tocker.ca/2014/01/24/proposal-to-enable-sql-mode-only-full-group-by-by-default.html
+			//	https://dev.mysql.com/doc/refman/5.6/en/group-by-handling.html
+			//self::get_dbh()->prepare("SET SESSION sql_mode = CONCAT('ONLY_FULL_GROUP_BY,', (SELECT @@sql_mode))")->execute();
 		}
 		catch(\PDOException $e){
 			throw new Error_db($e->getMessage(), $e->getCode());
@@ -137,30 +141,30 @@ class DB {
 		return self::$maps[self::$connection];
 	}
 	
-	static public function error(string $message, Array $translate=[], string $field=''){
+	static public function error(?string $field, string $message, Array $translate=[]){
 		if(!isset(self::$errors[self::$connection])){
 			self::$errors[self::$connection] = [];
 		}
 		
-		throw new Error('TRANSLATE ERRORS IN DB');
-		/*if($translate){
-			$replace = [];
-			foreach($translate as $k => $v){
-				$replace['%'.$k.'%'] = $v;
-			}
-			$message = strtr($message, $replace);
-		}*/
-		
-		self::$errors[self::$connection][$field] = $message;
+		self::$errors[self::$connection][$field ?: ''] = [
+			'message'	=> $message,
+			'translate'	=> $translate
+		];
 	}
 	
 	static public function check_errors(): bool{
 		return empty(self::$errors[self::$connection]) ? false : true;
 	}
 	
-	static public function flush_errors(): Array{
+	static public function flush_errors(bool $translate=false): array{
 		$errors = self::$errors[self::$connection] ?? [];
 		self::$errors[self::$connection] = [];
+		
+		if($translate){
+			foreach($errors as &$error){
+				$error = \dbdata\Lang::get_error($error['message'], $error['translate']);
+			}
+		}
 		
 		return $errors;
 	}
@@ -365,6 +369,10 @@ class DB {
 		return '\\dbdata\\'.$type.'\\'.$name;
 	}
 	
+	static public function is_array_sequential(array $arr): bool{
+		return array_keys($arr) === range(0, count($arr) - 1) ? true : false;
+	}
+	
 	static public function required_fields(Array $require_fields, Array $input){
 		$require_fields = array_flip($require_fields);
 		
@@ -406,12 +414,25 @@ class Error_db extends \Error {}
 //	Error caused by user input
 class Error_input extends \Error {
 	private $field;
-	private $translate = [];
+	private $translate 		= [];
 	
 	public function __construct(?string $field, string $message, array $translate=[]){
 		parent::__construct($message);
-		$this->field 		= $field;
+		$this->field 		= $field ?: null;
 		$this->translate 	= $translate;
+	}
+	
+	public function get_field(): ?string{
+		return $this->field;
+	}
+	
+	public function get_error(): ?string{
+		//	\dbdata\Error_input(null, '')
+		if(!$this->field && !$this->message){
+			return null;
+		}
+		
+		return \dbdata\Lang::get_error($this->message, $this->translate);
 	}
 	
 	public function push(Input $context){
