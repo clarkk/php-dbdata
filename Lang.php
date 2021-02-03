@@ -61,15 +61,15 @@ class Lang {
 		return '0';
 	}
 	
-	static public function get(string $string, array $trans=[], string $lang=''){
+	static public function get(string $string, array $trans=[], string $lang=''): string{
 		return self::fetch($string, $trans, $lang, false);
 	}
 	
-	static public function get_error(string $string, array $trans=[], string $lang=''){
+	static public function get_error(string $string, array $trans=[], string $lang=''): string{
 		return self::fetch($string, $trans, $lang, true);
 	}
 	
-	static private function fetch(string $string, array $trans, string $lang, bool $is_error){
+	static private function fetch(string $string, array $trans, string $lang, bool $is_error): string{
 		$lang = $lang ? strtolower($lang) : self::$lang;
 		
 		$replace = [];
@@ -90,9 +90,13 @@ class Lang {
 					'string' => $string
 				]
 			]);
-			if($row = $result->fetch()){
-				$lang_string = $row[$lang];
+			
+			//	Return string if not found in database
+			if(!$row = $result->fetch()){
+				return $string;
 			}
+			
+			$lang_string = $row[$lang];
 			
 			apcu_store($apc_key, $lang_string, self::APC_CACHE);
 		}

@@ -20,17 +20,17 @@ abstract class Input {
 	protected const CONDITION_NOT_IN 	= 'not_in';
 	protected const CONDITION_IN 		= 'in';
 	
-	const FLAG_ALLOW_EMPTY 			= 1;
-	const FLAG_UNSIGNED_FLOAT 		= 2;
-	const FLAG_UNSIGNED_INT 		= 3;
-	const FLAG_CONDITION_UNSET 		= 4;
-	const FLAG_MANDATORY			= 5;
-	const FLAG_ALLOW_INT_ZEROFILL 	= 6;
-	const FLAG_CALCULATE 			= 7;
-	const FLAG_EMPTY_CURRENT_DATE 	= 8;
-	const FLAG_MAP_FLOAT 			= 9;
-	const FLAG_SKIP_LENGTH_CHECK 	= 10;
-	const FLAG_DATE_TIME 			= 11;
+	const FLAG_ALLOW_EMPTY 				= 1;
+	const FLAG_UNSIGNED_FLOAT 			= 2;
+	const FLAG_UNSIGNED_INT 			= 3;
+	const FLAG_CONDITION_UNSET 			= 4;
+	const FLAG_MANDATORY				= 5;
+	const FLAG_ALLOW_INT_ZEROFILL 		= 6;
+	const FLAG_CALCULATE 				= 7;
+	const FLAG_EMPTY_CURRENT_DATE 		= 8;
+	const FLAG_MAP_FLOAT 				= 9;
+	const FLAG_SKIP_LENGTH_CHECK 		= 10;
+	const FLAG_DATE_TIME 				= 11;
 	
 	static public function get_external_field_condition_unset(){
 		return static::$_external_field_condition_unset;
@@ -93,10 +93,10 @@ abstract class Input {
 	public function throw_errors(){
 		if($this->_errors){
 			foreach($this->_errors as $field => $error){
-				DB::error($error['message'], $error['translate'], $field);
+				DB::error($field, $error['message'], $error['translate']);
 			}
 			
-			throw new \User_error('');
+			throw new Error_input(null, '');
 		}
 	}
 	
@@ -573,13 +573,14 @@ abstract class Input {
 			if($this->$field){
 				$this->$field = str_replace(' ', '', $this->$field);
 				
-				require_once \Ini::get('path/class').'/fetch_cache/Cache_vatno.php';
-				$result = (new \Fetch_cache\Cache_vatno)->get(\Fetch_cache\Cache_vatno::MODE_VATNO, $this->$field, $country);
-				if($result['status'] == \Fetch_cache\Fetch::STATUS_NOT_FOUND){
-					throw new Error_input($field, 'DATA_VATNO_INVALID', [
-						'field'		=> \Lang::get($this->_fields[$field]),
-						'country'	=> $country
-					]);
+				if($country){
+					$result = (new \Fetch_cache\Cache_vatno)->get(\Fetch_cache\Cache_vatno::MODE_VATNO, $this->$field, $country);
+					if($result['status'] == \Fetch_cache\Fetch::STATUS_NOT_FOUND){
+						throw new Error_input($field, 'DATA_VATNO_INVALID', [
+							'field'		=> \Lang::get($this->_fields[$field]),
+							'country'	=> strtoupper($country)
+						]);
+					}
 				}
 			}
 		}
@@ -690,7 +691,7 @@ abstract class Input {
 					return;
 				}
 				elseif((!isset($this->_method) || $this->_method == \dbdata\Data::METHOD_INSERT) && in_array(self::FLAG_EMPTY_CURRENT_DATE, $flags)){
-					$this->$field = \Env::get('date');
+					$this->$field = \Time\Time::time_today();
 					
 					return;
 				}
