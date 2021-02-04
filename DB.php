@@ -342,9 +342,9 @@ class DB {
 					];
 				}
 				
-				$db_column[$row['Field']]['not_null'] = $row['Null'] == 'NO' ? true : false;
-				$db_column[$row['Field']]['default'] = $row['Default'];
-				$db_column[$row['Field']]['extra'] = $row['Extra'];
+				$db_column[$row['Field']]['not_null']	= $row['Null'] == 'NO' ? true : false;
+				$db_column[$row['Field']]['default']	= $row['Default'];
+				$db_column[$row['Field']]['extra']		= $row['Extra'];
 			}
 			
 			apcu_store($apc_key, $db_column, $cache_timeout);

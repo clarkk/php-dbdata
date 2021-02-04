@@ -7,10 +7,12 @@ class Lang {
 	
 	static private $locales = [
 		self::LANG_DA => [
-			'locale'	=> 'da_DK.UTF-8'
+			'locale'	=> 'da_DK.UTF-8',
+			'currency'	=> 'DKK'
 		],
 		self::LANG_EN => [
-			'locale'	=> 'en_US.UTF-8'
+			'locale'	=> 'en_US.UTF-8',
+			'currency'	=> 'DKK'
 		]
 	];
 	
@@ -19,11 +21,17 @@ class Lang {
 	
 	static private $lang;
 	static private $locale;
+	static private $currency;
 	
-	static public function init(string $lang){
+	static public function init(string $lang): array{
 		self::$lang = strtolower($lang);
 		
-		$locale = self::$locales[$lang]['locale'];
+		//	Return error if language is invalid
+		if(empty(self::$locales[self::$lang])){
+			throw new Error('Invalid language');
+		}
+		
+		$locale = self::$locales[self::$lang]['locale'];
 		setLocale(LC_COLLATE, $locale);
 		setLocale(LC_CTYPE, $locale);
 		setLocale(LC_MONETARY, $locale);
@@ -33,6 +41,17 @@ class Lang {
 			'decimal_point'	=> $localeconv['mon_decimal_point'],
 			'thousands_sep'	=> $localeconv['mon_thousands_sep']
 		];
+		
+		self::$currency = self::$locales[self::$lang]['currency'];
+		
+		return self::get_locale();
+	}
+	
+	static public function get_locale(): array{
+		return [
+			'lang'		=> self::$lang,
+			'currency'	=> self::$currency
+		] + self::$locale;
 	}
 	
 	static public function num(float $num, int $dec=0, string $thousand_sep='', string $decimal_sep=''): string{
