@@ -394,9 +394,9 @@ abstract class Data extends DB {
 			$Data->get_lock();
 		}
 		if(!$row = $Data->exec($table, [
-			self::CLAUSE_SELECT => $select,
-			self::CLAUSE_WHERE => $this->output[self::CLAUSE_WHERE],
-			self::CLAUSE_LIMIT => 1
+			self::CLAUSE_SELECT 	=> $select,
+			self::CLAUSE_WHERE 		=> $this->output[self::CLAUSE_WHERE],
+			self::CLAUSE_LIMIT 		=> 1
 		])->fetch()){
 			throw new Error_input(null, 'ENTRY_NOT_FOUND');
 		}
