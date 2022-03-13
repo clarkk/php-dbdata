@@ -313,7 +313,7 @@ abstract class Input {
 			}
 		}
 		else{
-			$this->$field = date2time($this->$field);
+			$this->$field = \Time\Time::date($this->$field);
 			if($this->$field <= 0){
 				throw new Error_input($field, 'DATA_DATE_INVALID');
 			}
