@@ -58,28 +58,6 @@ class Lang {
 		return number_format($num, $dec, $decimal_sep ?: self::$locale['decimal_point'], $thousand_sep ?: self::$locale['thousands_sep']);
 	}
 	
-	static public function num_datasize(int $int): string{
-		if(!$int){
-			return '0';
-		}
-		
-		$arr = [
-			'Bytes'	=> 1,
-			'Kb'	=> 1024,
-			'Mb'	=> 1024 * 1024
-		];
-		
-		$arr = array_reverse($arr);
-		foreach($arr as $key => $value){
-			$scale = $int / $value;
-			if($scale >= 1){
-				return self::num($scale, is_int($scale) ? 0 : 2).' '.$key;
-			}
-		}
-		
-		return '0';
-	}
-	
 	static public function get(string $string, array $trans=[], string $lang=''): string{
 		return self::fetch($string, $trans, $lang, false);
 	}
