@@ -505,17 +505,9 @@ abstract class Input {
 			$this->$field = DB::value($this->_input[$field], $field, $this->_table, \Lang::get($this->_fields[$field]), true, true);
 			$this->error_empty($field);
 			
-			libxml_use_internal_errors(true);
-			$doc = new \DOMDocument('1.0', 'utf-8');
-			//$doc->validateOnParse 		= false;
-			//$doc->standalone 			= true;
-			//$doc->preserveWhiteSpace 	= true;
-			//$doc->strictErrorChecking 	= false;
-			//$doc->substituteEntities 	= false;
-			//$doc->recover 				= true;
-			//$doc->formatOutput 			= true;
-			$doc->loadHTML($this->$field);
-			if($errors = libxml_get_errors()){
+			$XML = new \Format\XML_decode;
+			$XML->string_html($this->$field);
+			if($errors = $XML->validation_errors()){
 				throw new Error_input($field, 'DATA_FIELD_HTML_INVALID', [
 					'field'		=> \Lang::get($this->_fields[$field]),
 					'message'	=> $errors[0]->message.' (Line: '.$errors[0]->line.')'
