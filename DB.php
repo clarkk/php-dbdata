@@ -350,10 +350,6 @@ class DB {
 		return '\\dbdata\\'.$type.'\\'.$name;
 	}
 	
-	static public function is_array_sequential(array $arr): bool{
-		return array_keys($arr) === range(0, count($arr) - 1) ? true : false;
-	}
-	
 	static public function required_fields(Array $require_fields, Array $input){
 		$require_fields = array_flip($require_fields);
 		

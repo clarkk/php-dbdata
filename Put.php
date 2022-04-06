@@ -69,7 +69,7 @@ class Put extends Data {
 				elseif($this->external){
 					throw new Error('Multiple put not allowed in external requests');
 				}
-				elseif(!self::is_array_sequential($this->input)){
+				elseif(!array_is_list($this->input)){
 					throw new Error('Multiple put input not sequential');
 				}
 				elseif(!$this->validate_multiple_input()){
