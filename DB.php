@@ -369,7 +369,7 @@ class DB {
 	}
 	
 	static protected function log_debug(string $message){
-		\Log\Log::log(self::$cid.' '.$message, 'debug_sql');
+		\Log\Log::log('debug_sql', self::$cid.' '.$message);
 	}
 	
 	static private function &get_dbh_all(): array{
