@@ -32,12 +32,13 @@ class Lang {
 		}
 		
 		$locale = self::$locales[self::$lang]['locale'];
-		setLocale(LC_COLLATE, $locale);
-		setLocale(LC_CTYPE, $locale);
-		setLocale(LC_MONETARY, $locale);
+		setlocale(LC_COLLATE, $locale);
+		setlocale(LC_CTYPE, $locale);
+		setlocale(LC_MONETARY, $locale);
 		$localeconv = localeconv();
 		
 		self::$locale = [
+			'locale'		=> self::$locales[self::$lang]['locale'],
 			'decimal_point'	=> $localeconv['mon_decimal_point'],
 			'thousands_sep'	=> $localeconv['mon_thousands_sep']
 		];
