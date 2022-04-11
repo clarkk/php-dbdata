@@ -31,18 +31,7 @@ class Lang {
 			throw new Error('Invalid language');
 		}
 		
-		$locale = self::$locales[self::$lang]['locale'];
-		setlocale(LC_COLLATE, $locale);
-		setlocale(LC_CTYPE, $locale);
-		setlocale(LC_MONETARY, $locale);
-		$localeconv = localeconv();
-		
-		self::$locale = [
-			'locale'		=> self::$locales[self::$lang]['locale'],
-			'decimal_point'	=> $localeconv['mon_decimal_point'],
-			'thousands_sep'	=> $localeconv['mon_thousands_sep']
-		];
-		
+		self::$locale 	= self::$locales[self::$lang]['locale'];
 		self::$currency = self::$locales[self::$lang]['currency'];
 		
 		return self::get_locale();
@@ -51,12 +40,9 @@ class Lang {
 	static public function get_locale(): array{
 		return [
 			'lang'		=> self::$lang,
+			'locale'	=> self::$locale,
 			'currency'	=> self::$currency
-		] + self::$locale;
-	}
-	
-	static public function num(float $num, int $dec=0, string $thousand_sep='', string $decimal_sep=''): string{
-		return number_format($num, $dec, $decimal_sep ?: self::$locale['decimal_point'], $thousand_sep ?: self::$locale['thousands_sep']);
+		];
 	}
 	
 	static public function get(string $string, array $trans=[], string $lang=''): string{
