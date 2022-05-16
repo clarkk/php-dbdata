@@ -354,7 +354,7 @@ abstract class Input {
 				}
 				
 				//	Check domain pattern
-				if(!preg_match('/^(?:(?:[a-z\d]|[a-z\d][a-z\d\-]*[a-z\d])\.)+(?:[a-z]{2,5})$/i', $domain)){
+				if(!preg_match('/^(?:(?:[a-z\d]|[a-z\d][a-z\d\-]*[a-z\d])\.)+(?:[a-z]{2,})$/i', $domain)){
 					throw new Error_input($field, 'DATA_EMAIL_INVALID_DOMAIN', [
 						'email'		=> $value,
 						'domain'	=> $domain
