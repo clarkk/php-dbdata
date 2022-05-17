@@ -17,6 +17,9 @@ class DB {
 	
 	private const DBH 					= 'dbh';
 	private const TRANSACTION 			= 'transaction';
+	private const DB_NAME 				= 'db';
+	private const DB_USER 				= 'user';
+	private const DB_PASS 				= 'pass';
 	
 	const OPT_ERR_MAXLENGTH 			= 'opt_err_maxlength';
 	
@@ -98,7 +101,10 @@ class DB {
 			
 			self::$connections[$handle] = [
 				self::DBH			=> $dbh,
-				self::TRANSACTION	=> false
+				self::TRANSACTION	=> false,
+				self::DB_NAME 		=> $db,
+				self::DB_USER 		=> $user,
+				self::DB_PASS 		=> $pass
 			];
 			
 			//	Load map
@@ -122,6 +128,10 @@ class DB {
 		catch(\PDOException $e){
 			throw new Error_db($e->getMessage(), $e->getCode());
 		}
+	}
+	
+	static public function reconnect(){
+		self::connect(self::$connection, self::$connections[self::$connection][self::DB_NAME], self::$connections[self::$connection][self::DB_USER], self::$connections[self::$connection][self::DB_PASS]);
 	}
 	
 	static public function use_connection(string $handle){
@@ -401,6 +411,14 @@ class Error_input extends \Error {
 	
 	public function get_field(): ?string{
 		return $this->field;
+	}
+	
+	public function get_raw_error(): array{
+		return [
+			'field'		=> $this->field,
+			'message'	=> $this->message,
+			'translate'	=> $this->translate
+		];
 	}
 	
 	public function get_error(): ?string{
