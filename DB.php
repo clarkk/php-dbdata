@@ -86,7 +86,7 @@ class DB {
 		return self::$env[$key];
 	}
 	
-	static public function connect(string $handle, string $db, string $user, string $pass, int $port=3306, string $host='localhost', string $driver='mysql', bool $debug=false){
+	static public function connect(string $handle, string $db, string $user, string $pass, int $port=3306, string $host='localhost', string $driver='mysql'){
 		if(isset(self::$connections[$handle])){
 			throw new Error('DB connection handle already used');
 		}
@@ -98,11 +98,6 @@ class DB {
 				\PDO::ATTR_DEFAULT_FETCH_MODE	=> \PDO::FETCH_ASSOC,
 				\PDO::ATTR_AUTOCOMMIT			=> true
 			]);
-			
-			if($debug){
-				\Log\Log::log('db_reconnect', $driver.':dbname='.$db.';host='.$host.';port='.$port.';charset=utf8 user='.$user.' pass='.$pass);
-				\Log\Log::log('db_reconnect', var_export($dbh, true));
-			}
 			
 			self::$connections[$handle] = [
 				self::DBH			=> $dbh,
@@ -136,7 +131,7 @@ class DB {
 	}
 	
 	static public function reconnect(){
-		self::connect(self::$connection, self::$connections[self::$connection][self::DB_NAME], self::$connections[self::$connection][self::DB_USER], self::$connections[self::$connection][self::DB_PASS], 3306, 'localhost', 'mysql', true);
+		self::connect(self::$connection, self::$connections[self::$connection][self::DB_NAME], self::$connections[self::$connection][self::DB_USER], self::$connections[self::$connection][self::DB_PASS]);
 	}
 	
 	static public function use_connection(string $handle){
