@@ -131,7 +131,10 @@ class DB {
 	}
 	
 	static public function reconnect(){
-		self::connect(self::$connection, self::$connections[self::$connection][self::DB_NAME], self::$connections[self::$connection][self::DB_USER], self::$connections[self::$connection][self::DB_PASS]);
+		$connection = self::$connections[self::$connection];
+		unset(self::$connections[self::$connection]);
+		
+		self::connect(self::$connection, $connection[self::DB_NAME], $connection[self::DB_USER], $connection[self::DB_PASS]);
 	}
 	
 	static public function use_connection(string $handle){
