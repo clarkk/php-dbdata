@@ -205,7 +205,7 @@ class DB {
 			$is_db_text_field 	= false;
 		}
 		
-		$value = \Str\Str::filter_utf8($value, $allow_newlines ? 'n' : '');
+		$value = \Str\Str::filter_utf8($value, \Str\Str::ENC_UTF8, $allow_newlines ? 'n' : '');
 		
 		//	Trim whitespaces in strings
 		if($trim_whitespaces){
