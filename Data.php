@@ -44,8 +44,7 @@ abstract class Data extends DB {
 	protected $check_external_rights 	= true;
 	
 	//	Define user-level
-	protected $access_level 	= '';
-	const LEVEL_SYSTEM			= 'system';
+	protected $access_all 		= false;
 	
 	//	Omit user auth table relations
 	protected $omit_user_auth	= false;
@@ -143,8 +142,8 @@ abstract class Data extends DB {
 		$this->test = true;
 	}
 	
-	public function access_level(string $level): self{
-		$this->access_level = $level;
+	public function access_all(): self{
+		$this->access_all = true;
 		
 		return $this;
 	}
@@ -381,8 +380,8 @@ abstract class Data extends DB {
 	
 	protected function get_predata(string $table, array $select, bool $is_get_lock=false): array{
 		$Data = new Get;
-		if($this->access_level){
-			$Data->access_level($this->access_level);
+		if($this->access_all){
+			$Data->access_all();
 		}
 		if(!$this->use_table_const){
 			$Data->omit_table_const();

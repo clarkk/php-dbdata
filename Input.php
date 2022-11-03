@@ -257,9 +257,12 @@ abstract class Input {
 	protected function error_unique(string $field, Array $options=[]){
 		$table = $options['table'] ?? $this->_table;
 		
-		$access_level = $this->Data->get_var('access_level');
+		$access_all = $this->Data->get_var('access_all');
 		
-		$Data = (new Get)->access_level($access_level);
+		$Data = (new Get);
+		if($access_all){
+			$Data->access_all();
+		}
 		$input = [
 			'select' => [
 				'id'
@@ -273,9 +276,9 @@ abstract class Input {
 			$input['where'] = array_merge($options['where'], $input['where']);
 		}
 		if(!empty($this->_predata['id'])){
-			if($access_level){
+			if($access_all){
 				$input['where']['block_id'] = (new Get)
-					->access_level($access_level)
+					->access_all()
 					->exec($table, [
 						'select' => [
 							'block_id'
@@ -308,6 +311,7 @@ abstract class Input {
 	//	Validate date
 	protected function error_date(string $field, bool $time=false){
 		if(is_numeric($this->$field) && $this->$field > 1200000000){
+			$this->$field = (int)$this->$field;
 			if(!$time){
 				$this->$field = mktime(0,0,0, date('m', $this->$field), date('d', $this->$field), date('Y', $this->$field));
 			}
@@ -570,6 +574,7 @@ abstract class Input {
 					if($result['status'] == \Fetch_cache\Fetch::STATUS_NOT_FOUND){
 						throw new Error_input($field, 'DATA_VATNO_INVALID', [
 							'field'		=> \Lang::get($this->_fields[$field]),
+							'value'		=> $this->$field,
 							'country'	=> strtoupper($country)
 						]);
 					}
@@ -672,8 +677,14 @@ abstract class Input {
 		}
 	}
 	
-	protected function put_time(string $field, Array $flags=[]){
+	protected function put_time(string $field, Array $flags=[], bool $unset=false){
 		try{
+			if($unset){
+				$this->$field = 0;
+				
+				return;
+			}
+			
 			$this->$field = DB::value($this->_input[$field]);
 			
 			if(!$this->$field){
