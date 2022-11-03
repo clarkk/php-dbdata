@@ -257,7 +257,7 @@ abstract class Input {
 	protected function error_unique(string $field, Array $options=[]){
 		$table = $options['table'] ?? $this->_table;
 		
-		$access_all = $this->Data->get_var('access_all');
+		$access_all = $this->Data->is_access_all();
 		
 		$Data = (new Get);
 		if($access_all){

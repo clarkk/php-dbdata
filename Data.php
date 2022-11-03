@@ -177,7 +177,7 @@ abstract class Data extends DB {
 		foreach($this->sql_data as $data){
 			$pos = strpos($sql, '?');
 			if($pos !== false){
-				$sql = substr_replace($sql, $data, $pos, 1);
+				$sql = substr_replace($sql, (string)$data, $pos, 1);
 			}
 		}
 		
@@ -191,6 +191,10 @@ abstract class Data extends DB {
 	
 	public function get_output(): Array{
 		return $this->output;
+	}
+	
+	public function is_access_all(): bool{
+		return $this->access_all;
 	}
 	
 	public function get_var(string $name, string $valid=''){
