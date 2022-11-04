@@ -259,7 +259,7 @@ abstract class Input {
 		
 		$access_all = $this->Data->is_access_all();
 		
-		$Data = (new Get);
+		$Data = new Get;
 		if($access_all){
 			$Data->access_all();
 		}
