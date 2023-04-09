@@ -7,17 +7,19 @@ class Lang {
 	
 	static private $locales = [
 		self::LANG_DA => [
-			'locale'	=> 'da_DK.UTF-8',
+			'locale'	=> 'da_DK.'.self::ENC_UTF8,
 			'currency'	=> 'DKK'
 		],
 		self::LANG_EN => [
-			'locale'	=> 'en_US.UTF-8',
+			'locale'	=> 'en_US.'.self::ENC_UTF8,
 			'currency'	=> 'DKK'
 		]
 	];
 	
-	const LANG_DA = 'da';
-	const LANG_EN = 'en';
+	const LANG_DA 	= 'da';
+	const LANG_EN 	= 'en';
+	
+	const ENC_UTF8 	= 'UTF-8';
 	
 	static private $lang;
 	static private $locale;
@@ -43,6 +45,10 @@ class Lang {
 			'locale'	=> self::$locale,
 			'currency'	=> self::$currency
 		];
+	}
+	
+	static public function get_locales(): array{
+		return array_keys(self::$locales);
 	}
 	
 	static public function get(string $string, array $trans=[], string $lang=''): string{

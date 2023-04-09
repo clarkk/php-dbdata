@@ -166,7 +166,7 @@ abstract class Model extends Input {
 	private function get_unapply_multiplier(){
 		if(static::$_external_field_int_multiplier){
 			foreach(static::$_external_field_int_multiplier as $field => $multiply){
-				if(isset($this->$field)){
+				if(isset($this->$field) && $this->$field != ''){
 					$this->$field = (string)((float)$this->$field / $multiply);
 				}
 			}
@@ -188,7 +188,7 @@ abstract class Model extends Input {
 	}
 	
 	public function field_apply_multiplier(string $field, float $value=null): int{
-		return ($value ?? $this->$field) * static::$_external_field_int_multiplier[$field];
+		return round(($value ?? $this->$field) * static::$_external_field_int_multiplier[$field]);
 	}
 	
 	public function get_deferred_sub_exec(): Array{

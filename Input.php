@@ -351,7 +351,7 @@ abstract class Input {
 	protected function validate_email(string $field, string $value){
 		$pos = strpos($value, '@');
 		if($pos !== false){
-			if($domain = substr($value, $pos + 1)){
+			if($domain = strtolower(substr($value, $pos + 1))){
 				//	Check if domain is IDN (Internation Domain Name) and convert to punycode
 				if(!preg_match('/^[a-z\d\-._]+$/i', $domain)){
 					$domain = idn_to_ascii($domain) ?: $domain;
@@ -365,11 +365,18 @@ abstract class Input {
 					]);
 				}
 				
-				if(!checkdnsrr($domain, 'mx')){
-					throw new Error_input($field, 'DATA_EMAIL_INVALID_DOMAIN', [
-						'email'		=> $value,
-						'domain'	=> $domain
-					]);
+				//	Cache DNS MX check
+				$key 	= 'dns-mx:'.$domain;
+				$Cache 	= new \Utils\Cache\Cache(\Ini::get('redis/pass'));
+				if(!$Cache->fetch($key)){
+					if(!checkdnsrr($domain, 'mx')){
+						throw new Error_input($field, 'DATA_EMAIL_INVALID_DOMAIN', [
+							'email'		=> $value,
+							'domain'	=> $domain
+						]);
+					}
+					
+					$Cache->write($key, 1, 60*60*30);
 				}
 			}
 			else{
@@ -577,6 +584,10 @@ abstract class Input {
 							'value'		=> $this->$field,
 							'country'	=> strtoupper($country)
 						]);
+					}
+					
+					if(!empty($result['data']['vatno'])){
+						$this->$field = $result['data']['vatno'];
 					}
 				}
 			}
@@ -793,6 +804,29 @@ abstract class Input {
 			}
 			else{
 				$this->bank_id = null;
+			}
+		}
+		catch(Error_input $e){
+			$e->push($this);
+		}
+	}
+	
+	protected function put_bank_invoice(string $field, array $flags=[]){
+		try{
+			if($flags && in_array(self::FLAG_CONDITION_UNSET, $flags) && !$this->external_field_condition_unset($field, 'bank_id')){
+				return;
+			}
+			
+			if($value = DB::value($this->_input[$field])){
+				if($bank = load_resource('bank')->get_by_name($value)){
+					$this->bank_id = $bank['id'];
+				}
+			}
+			
+			if(empty($this->bank_id)){
+				throw new Error_input($field, 'DATA_FIELD_INVALID', [
+					'field' => \Lang::get($this->_fields[$field])
+				]);
 			}
 		}
 		catch(Error_input $e){
