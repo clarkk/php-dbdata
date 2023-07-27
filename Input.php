@@ -577,8 +577,7 @@ abstract class Input {
 				$this->$field = str_replace(' ', '', $this->$field);
 				
 				if($country){
-					$result = (new \Fetch_cache\Cache_vatno)->get(\Fetch_cache\Cache_vatno::MODE_VATNO, $this->$field, $country);
-					if($result['status'] == \Fetch_cache\Fetch::STATUS_NOT_FOUND){
+					if(!$result = (new \Service_cache\Country_vat)->vat($country, $this->$field)){
 						throw new Error_input($field, 'DATA_VATNO_INVALID', [
 							'field'		=> \Lang::get($this->_fields[$field]),
 							'value'		=> $this->$field,
@@ -586,9 +585,7 @@ abstract class Input {
 						]);
 					}
 					
-					if(!empty($result['data']['vatno'])){
-						$this->$field = $result['data']['vatno'];
-					}
+					$this->$field = $result['vat'];
 				}
 			}
 		}
