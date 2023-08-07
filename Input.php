@@ -577,15 +577,18 @@ abstract class Input {
 				$this->$field = str_replace(' ', '', $this->$field);
 				
 				if($country){
-					if(!$result = (new \Service_cache\Country_vat)->vat($country, $this->$field)){
+					try{
+						if($result = (new \Service_cache\Country_vat)->vat($country, $this->$field)){
+							$this->$field = $result['vat'];
+						}
+					}
+					catch(\Service_cache\Error_not_found $e){
 						throw new Error_input($field, 'DATA_VATNO_INVALID', [
 							'field'		=> \Lang::get($this->_fields[$field]),
 							'value'		=> $this->$field,
 							'country'	=> strtoupper($country)
 						]);
 					}
-					
-					$this->$field = $result['vat'];
 				}
 			}
 		}
