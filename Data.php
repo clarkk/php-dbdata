@@ -518,15 +518,17 @@ abstract class Data extends DB {
 			switch($field_translate[2]){
 				case self::FIELD_NULL_TO_BOOL:
 					$table_field = 'IF('.$table_short.'.'.$trans_field.' IS NULL,0,1)';
-					$trans_field = 'IF('.$trans_field.' IS NULL,0,1)';
+					$trans_field = 'IF(`'.$trans_field.'` IS NULL,0,1)';
 					break;
 				
 				default:
 					$table_field = $table_short.'.'.$trans_field;
+					$trans_field = '`'.$trans_field.'`';
 			}
 		}
 		else{
 			$table_field = $table_short.'.'.$trans_field;
+			$trans_field = '`'.$trans_field.'`';
 		}
 		
 		return [

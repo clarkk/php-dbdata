@@ -294,16 +294,17 @@ class DB {
 						'length'	=> $match[2]
 					];
 				}
-				elseif(preg_match('/^('.implode('|', array_keys(self::$int_range)).')\((\d+)\)(?: (.*))?/', $row['Type'], $match)){
-					if(!isset($match[3])){
-						$match[3] = null;
+				elseif(preg_match('/^('.implode('|', array_keys(self::$int_range)).')(?: (.*))?/', $row['Type'], $match)){
+					if(!isset($match[2])){
+						$match[2] = null;
 					}
-					$unsigned = $match[3] == 'unsigned' ? 1 : 0;
+					
+					$unsigned = $match[2] == 'unsigned' ? 1 : 0;
 					$from = $unsigned ? 0 : self::$int_range[$match[1]] * -1 / 2;
 					$db_column[$row['Field']] = [
 						'type'		=> self::TYPE_INTEGER,
 						'subtype'	=> $match[1],
-						'length'	=> $match[2],
+						'length'	=> 0,
 						'unsigned'	=> $unsigned,
 						'range'		=> [
 							'from'	=> $from,
