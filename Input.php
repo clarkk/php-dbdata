@@ -2,6 +2,7 @@
 
 namespace dbdata;
 
+#[\AllowDynamicProperties]
 abstract class Input {
 	private $_errors 	= [];
 	
