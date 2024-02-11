@@ -210,7 +210,7 @@ class Put extends Data {
 			else{
 				$str_field = $this->translate_clause($field['fields']);
 			}
-			$str_where = $this->translate_clause($where['fields'], ' && ');
+			$str_where = $this->translate_clause($where['fields'], ' AND ');
 			
 			$this->sql_data = empty($where['names']) ? $field['names'] : array_merge($field['names'], $where['names']);
 			

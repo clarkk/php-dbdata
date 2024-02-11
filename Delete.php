@@ -84,7 +84,7 @@ class Delete extends Data {
 				$where = $this->prepare_where();
 				
 				//	Translate table fields
-				$str_where = $this->translate_clause($where['fields'], ' && ');
+				$str_where = $this->translate_clause($where['fields'], ' AND ');
 				
 				//	Create SQL query
 				if($this->is_joined){

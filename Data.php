@@ -591,7 +591,7 @@ abstract class Data extends DB {
 				
 				//	Add second join clause
 				if(isset($options[self::JOIN_OPTION_JOIN])){
-					$clause .= ' && '.$table_short.'.'.$options[self::JOIN_OPTION_JOIN][0].'=';
+					$clause .= ' AND '.$table_short.'.'.$options[self::JOIN_OPTION_JOIN][0].'=';
 					if($options[self::JOIN_OPTION_JOIN][1][0] == '='){
 						$clause .= substr($options[self::JOIN_OPTION_JOIN][1], 1);
 					}

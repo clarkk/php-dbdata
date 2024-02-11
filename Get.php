@@ -182,14 +182,14 @@ class Get extends Data {
 			
 			//	Join clauses and translate table fields
 			$str_select 	= $this->translate_clause($select);
-			$str_where 		= $this->translate_clause($where['fields'], ' && ');
-			$str_like 		= $this->translate_clause($like['fields'], ' || ');
+			$str_where 		= $this->translate_clause($where['fields'], ' AND ');
+			$str_like 		= $this->translate_clause($like['fields'], ' OR ');
 			$str_group 		= $this->translate_clause($group);
 			$str_order 		= $this->translate_clause($order);
 			
 			if($str_like){
 				if($str_where){
-					$str_where .= ' && ('.$str_like.')';
+					$str_where .= ' AND ('.$str_like.')';
 				}
 				else{
 					$str_where = $str_like;
